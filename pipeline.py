@@ -23,11 +23,17 @@ from pathlib import Path
 from config import *
 
 # ---- detect real Pathway vs stub ----
+# The Windows stub (pathway==0.post1) silently returns None for pw.this instead
+# of raising AttributeError, so we use the version string as a reliable check.
+# Stub version always contains "post" (e.g. "0.post1"); real versions don't ("0.29.1").
 _REAL = False
 try:
     import pathway as pw
-    _ = pw.this          # raises AttributeError on the Windows stub
-    _REAL = True
+    _v = getattr(pw, "__version__", "0.post1")
+    if "post" not in _v:          # real Pathway binary
+        _ = pw.this               # extra sanity – must be a non-None reference
+        if _ is not None:
+            _REAL = True
 except Exception:
     pass
 USE_REAL = _REAL and (os.environ.get("PATHWAY_REAL", "1" if _REAL else "0") != "0")
