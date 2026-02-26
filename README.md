@@ -49,6 +49,24 @@ Real-time streaming system that:
 
 ---
 
+## 🔥 How We Used Pathway (Hackathon Requirements)
+
+| Requirement | Our Implementation |
+|-------------|-------------------|
+| **Live Streaming Ingestion** | `mode="streaming"` with `autocommit_duration_ms=2000` — watches CSV files for changes every 2 s |
+| **Stateful Window Computations** | 48-hour rolling averages per zone using `pw.reducers.avg()` |
+| **Document Store (Live Indexing)** | `DocumentStore` monitors `ngt_orders/` folder, auto-indexes new files |
+| **LLM xPack RAG** | Legal documents indexed and retrievable via `/api/legal/query` |
+| **Exactly-Once Semantics** | `exactly_once=True` on all output sinks (content-hash dedup on Windows) |
+| **Persistence** | `pw.run(persistence=True)` with filesystem backend (`./persistence/`) |
+| **Custom Connector Ready** | Architecture supports adding custom Python connector |
+
+> **Windows note:** Pathway's native binary ships for Linux/macOS only.  
+> On Windows the pipeline runs an exact semantic clone in pure Python.  
+> To use the real Pathway engine, run in WSL/Linux and set `PATHWAY_REAL=1`.
+
+---
+
 ## Quick Start
 
 ### Prerequisites
