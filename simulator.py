@@ -1,8 +1,13 @@
 """
-JalJeevan Score -- Live Data Simulator
+JalJeevan Score — Live Data Simulator
+======================================
 Run in a SEPARATE terminal while pipeline.py and app.py are running.
-Appends new sensor rows every 10 seconds -- proves Pathway detects changes
-and updates output/stats.jsonl automatically (the core hackathon requirement).
+Appends new sensor rows every 10 seconds to prove that Pathway detects
+file changes and updates output/stats.jsonl automatically — this is the
+core "live streaming" requirement judges will test.
+
+Usage:
+    python simulator.py
 """
 
 import time, random
@@ -11,11 +16,11 @@ from config import DOLPHIN_CSV, MINING_CSV, ZONES
 
 print("=" * 52)
 print("  JalJeevan Live Simulator")
-print("  Appending sensor data every 10 seconds...")
+print("  Appending new sensor data every 10 seconds")
+print("  Zone9 will decline (simulates upstream mining)")
 print("  Watch http://localhost:8000 for live updates")
 print("  Ctrl+C to stop")
-print("=" * 52)
-print()
+print("=" * 52 + "\n")
 
 tick = 0
 while True:
@@ -24,16 +29,14 @@ while True:
 
     with open(DOLPHIN_CSV, "a") as f:
         for z in ZONES:
-            # Zone9 gradually declines -- mining upstream scares dolphins
             if z["id"] == "Zone9":
                 count = max(8, z["base"] - tick * 2 + random.randint(-2, 1))
             else:
                 count = z["base"] + random.randint(-2, 2)
             f.write(f"{ts},{z['id']},{count},0.{random.randint(88,97)}\n")
 
-    print(f"[{ts}] Tick {tick:03d} -- Dolphin data for {len(ZONES)} zones")
+    print(f"[{ts}] Tick {tick:03d} -- dolphin readings written ({len(ZONES)} zones)")
 
-    # Mining detection every 5 ticks
     if tick % 5 == 0:
         conf  = round(random.uniform(0.86, 0.97), 2)
         turb  = round(random.uniform(2.1, 3.8), 2)
