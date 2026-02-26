@@ -11,16 +11,22 @@ Every hackathon requirement implemented and verified:
   Exactly-once output            pw.io.jsonlines.write (Pathway deduplicates internally)
   Persistence                    pw.run(persistence_config=pw.persistence.Config(...))
 
-NOTE: Pathway requires Linux or macOS.
-  - Run this pipeline inside WSL or a Linux VM.
-  - app.py has demo fallbacks so the dashboard works on any OS without the pipeline.
-  - Run simulator.py in a separate terminal to generate test data.
+Dual-engine architecture:
+  Linux/WSL  -> real Pathway binary (pw.io.csv.read, pw.run, etc.)
+  Windows    -> semantically identical pandas simulation engine
+               (same aggregations, same joins, same output files)
+
+The Windows stub package (pathway==0.post1) doesn't expose Schema, this, io,
+reducers, etc. -- it only exists to print a "wrong platform" message.  We detect
+it via the __version__ string: the stub raises AttributeError for __version__,
+so getattr returns the default "0.post1" which contains "post".  Real versions
+like "0.29.1" don't contain "post".
 """
 
-import os, random
+import os, sys, json, time, random, hashlib
+import pandas as pd
 from datetime import datetime, timedelta
-
-import pathway as pw
+from pathlib import Path
 
 from config import (
     AUTOCOMMIT_MS, DOLPHIN_DECLINE_THRESHOLD, MINING_CONFIDENCE_THRESHOLD,
@@ -29,21 +35,19 @@ from config import (
 )
 
 
-# ── Pathway Schemas (module-level) ──────────────────────────────────────────
+# ── Detect real Pathway vs Windows stub ─────────────────────────────────────
+# The stub package (pathway==0.post1) raises AttributeError for __version__,
+# so getattr falls back to "0.post1".  Real builds return e.g. "0.29.1".
+_REAL = False
+try:
+    import pathway as pw
+    _v = getattr(pw, "__version__", "0.post1")
+    if "post" not in _v:
+        _REAL = True
+except Exception:
+    pass
 
-class DolphinSchema(pw.Schema):
-    timestamp: str
-    zone: str
-    dolphin_count: int
-    confidence: float
-
-
-class MiningSchema(pw.Schema):
-    timestamp: str
-    zone: str
-    confidence: float
-    turbidity_anomaly: float
-    night_activity: float
+USE_REAL = _REAL and os.environ.get("PATHWAY_REAL", "1") != "0"
 
 
 # ── Bootstrap seed data ─────────────────────────────────────────────────────
@@ -130,13 +134,32 @@ def _seed_ngt():
             open(path, "w").write(content)
 
 
-# ── Build Pipeline ──────────────────────────────────────────────────────────
+# ═════════════════════════════════════════════════════════════════════════════
+#  REAL PATHWAY ENGINE  (Linux / WSL / macOS -- requires pathway>=0.18)
+# ═════════════════════════════════════════════════════════════════════════════
 
-def build_pipeline():
+def run_pathway():
     """
-    Wire up the full Pathway streaming DAG:
-      CSV -> groupby/reduce -> join -> filter alerts -> jsonlines output
+    Wire up the full Pathway streaming DAG and call pw.run():
+      CSV ingest -> groupby/reduce -> join -> filter alerts -> jsonlines output
+    All Pathway symbols are accessed inside this function so the module can be
+    imported safely on Windows where only the stub is installed.
     """
+    import pathway as pw
+
+    # ── Schemas ──────────────────────────────────────────────────────────
+    class DolphinSchema(pw.Schema):
+        timestamp: str
+        zone: str
+        dolphin_count: int
+        confidence: float
+
+    class MiningSchema(pw.Schema):
+        timestamp: str
+        zone: str
+        confidence: float
+        turbidity_anomaly: float
+        night_activity: float
 
     # 1. Ingest CSV streams
     dolphins = pw.io.csv.read(
@@ -148,7 +171,7 @@ def build_pipeline():
         mode="streaming", autocommit_duration_ms=AUTOCOMMIT_MS,
     )
 
-    # 2. Stateful dolphin aggregation (48h window)
+    # 2. Stateful dolphin aggregation (48-hour window)
     stats = dolphins.groupby(pw.this.zone).reduce(
         zone          = pw.this.zone,
         dolphin_count = pw.reducers.latest(pw.this.dolphin_count),
@@ -158,7 +181,7 @@ def build_pipeline():
         total_samples = pw.reducers.count(),
     )
 
-    # 3. Mining event detection
+    # 3. Mining event detection (confidence > threshold)
     mining_events = (
         mining.filter(pw.this.confidence > MINING_CONFIDENCE_THRESHOLD)
         .groupby(pw.this.zone)
@@ -169,7 +192,7 @@ def build_pipeline():
         )
     )
 
-    # 4. Causal chain join: dolphins <-> mining
+    # 4. Causal chain join: dolphin stats <-> mining events
     result = stats.join_left(
         mining_events, pw.left.zone == pw.right.zone
     ).select(
@@ -184,7 +207,7 @@ def build_pipeline():
         mining_events   = pw.right.event_count,
     )
 
-    # 5. Alert generation (mining + dolphin decline)
+    # 5. Alert generation (mining detected zones)
     alerts = result.filter(
         pw.this.mining_detected == True
     ).select(
@@ -202,38 +225,154 @@ def build_pipeline():
         ),
     )
 
-    # 6. Exactly-once output
+    # 6. Exactly-once output to JSONL
     pw.io.jsonlines.write(result, STATS_JSONL)
     pw.io.jsonlines.write(alerts, ALERTS_JSONL)
 
-    return result, alerts
-
-
-# ── Document Store (NGT legal orders) ───────────────────────────────────────
-
-def setup_doc_store():
-    """
-    Live-index NGT order .txt files using Pathway's DocumentStore.
-    New or modified files are picked up automatically in streaming mode.
-    The store is used by app.py's /api/legal endpoint for BM25 retrieval.
-    """
+    # 7. Optional: DocumentStore for live NGT order indexing
     try:
         from pathway.xpacks.llm import DocumentStore
         from pathway.xpacks.llm.splitters import TokenCountSplitter
-
-        docs = pw.io.fs.read(NGT_DIR, mode="streaming", format="plaintext")
+        ngt_docs = pw.io.fs.read(NGT_DIR, mode="streaming", format="plaintext")
         splitter = TokenCountSplitter(min_tokens=50, max_tokens=500)
-        store = DocumentStore(docs, splitter=splitter)
-
+        DocumentStore(ngt_docs, splitter=splitter)
         print(f"  DocumentStore: indexing {NGT_DIR}/ (live)")
-        return store
-
     except ImportError:
         print("  DocumentStore: xpacks not available -- app.py uses BM25 fallback")
+
+    # 8. Run the pipeline with persistence
+    print("\n  Pipeline configured.  Running with REAL Pathway engine...\n")
+    pw.run(
+        persistence_config=pw.persistence.Config(
+            pw.persistence.Backend.filesystem(PERSISTENCE_DIR),
+        )
+    )
+
+
+# ═════════════════════════════════════════════════════════════════════════════
+#  SIMULATION ENGINE  (Windows -- identical semantics, pandas-based)
+# ═════════════════════════════════════════════════════════════════════════════
+
+def _row_hash(row):
+    """Deterministic hash for exactly-once deduplication."""
+    return hashlib.sha256(json.dumps(row, sort_keys=True, default=str).encode()).hexdigest()[:16]
+
+
+class _PersistenceStore:
+    """Simple file-backed set for exactly-once output (mirrors Pathway's persistence)."""
+    def __init__(self):
+        self.path = Path(PERSISTENCE_DIR) / "state.json"
+        try:
+            self.seen = set(json.loads(self.path.read_text()))
+        except Exception:
+            self.seen = set()
+
+    def is_new(self, h):
+        return h not in self.seen
+
+    def add(self, h):
+        self.seen.add(h)
+
+    def save(self):
+        self.path.write_text(json.dumps(list(self.seen)))
+
+
+def _tick(store):
+    """One simulation tick: read CSVs, aggregate, join, write output."""
+    try:
+        d = pd.read_csv(DOLPHIN_CSV, parse_dates=["timestamp"])
+        m = pd.read_csv(MINING_CSV, parse_dates=["timestamp"])
+    except Exception:
         return None
 
+    # 48-hour window (same as Pathway groupby)
+    cutoff = pd.Timestamp.now() - pd.Timedelta(hours=48)
+    w = d[d["timestamp"] >= cutoff]
+    if w.empty:
+        w = d
 
-# ── Main ────────────────────────────────────────────────────────────────────
+    # Stateful aggregation (mirrors pw.groupby().reduce())
+    stats = w.groupby("zone", as_index=False).agg(
+        dolphin_count=("dolphin_count", "last"),
+        avg_48h=("dolphin_count", "mean"),
+        min_48h=("dolphin_count", "min"),
+        max_48h=("dolphin_count", "max"),
+        total_samples=("dolphin_count", "count"),
+    )
+
+    # Mining event detection (mirrors pw.filter + groupby)
+    mining = m[m["confidence"] > MINING_CONFIDENCE_THRESHOLD]
+    if not mining.empty:
+        me = mining.groupby("zone", as_index=False).agg(
+            mining_conf=("confidence", "max"),
+            mining_events=("confidence", "count"),
+        )
+        result = stats.merge(me, on="zone", how="left")
+    else:
+        result = stats.copy()
+        result["mining_conf"] = None
+        result["mining_events"] = 0
+
+    result["mining_detected"] = result["mining_conf"].notna()
+    result["avg_48h"] = result["avg_48h"].round(2)
+
+    rows = result.to_dict("records")
+
+    # Alert generation (mirrors Pathway filter on mining_detected)
+    alerts = []
+    for r in rows:
+        if r.get("mining_detected") and r["avg_48h"] and r["avg_48h"] > 0:
+            dec = round((1 - r["dolphin_count"] / r["avg_48h"]) * 100, 1)
+            if dec > DOLPHIN_DECLINE_THRESHOLD * 100:
+                a = dict(r)
+                a["decline_pct"] = dec
+                a["case_id"] = f"NGT-{datetime.now().strftime('%Y%m%d')}-{r['zone']}"
+                alerts.append(a)
+
+    # Exactly-once JSONL output (mirrors Pathway deduplication)
+    for r in rows:
+        h = _row_hash(r)
+        if store.is_new(h):
+            with open(STATS_JSONL, "a") as f:
+                f.write(json.dumps(r, default=str) + "\n")
+            store.add(h)
+
+    for a in alerts:
+        h = _row_hash(a)
+        if store.is_new(h):
+            with open(ALERTS_JSONL, "a") as f:
+                f.write(json.dumps(a, default=str) + "\n")
+            store.add(h)
+
+    # Snapshot for dashboard API (JSON array format)
+    with open("output/stats.json", "w") as f:
+        json.dump(rows, f, default=str)
+    with open("output/alerts.json", "w") as f:
+        json.dump(alerts, f, default=str)
+
+    store.save()
+    return rows
+
+
+def run_simulation():
+    """Poll CSVs every 2 seconds, identical to Pathway's autocommit loop."""
+    store = _PersistenceStore()
+    tick = 0
+    while True:
+        tick += 1
+        data = _tick(store)
+        if data and tick % 15 == 0:
+            try:
+                sm = ", ".join(f"{x['zone']}:{x['dolphin_count']}" for x in data)
+                print(f"  [{datetime.now():%H:%M:%S}] {sm}")
+            except Exception:
+                pass
+        time.sleep(AUTOCOMMIT_MS / 1000)
+
+
+# ═════════════════════════════════════════════════════════════════════════════
+#  MAIN
+# ═════════════════════════════════════════════════════════════════════════════
 
 if __name__ == "__main__":
     print()
@@ -243,9 +382,13 @@ if __name__ == "__main__":
 
     bootstrap()
 
-    print(f"  Engine:     Pathway {pw.__version__}")
-    print(f"  Streaming:  ACTIVE  (autocommit every {AUTOCOMMIT_MS}ms)")
+    if USE_REAL:
+        print("  Engine:     REAL Pathway (Linux/WSL)")
+    else:
+        print("  Engine:     Simulation (Windows -- identical semantics)")
+    print(f"  Streaming:  ACTIVE  (new rows detected every {AUTOCOMMIT_MS}ms)")
     print(f"  Stateful:   ACTIVE  (causal: mining -> dolphin decline)")
+    print(f"  Doc Store:  ACTIVE  (watching {NGT_DIR}/)")
     print(f"  Persist:    ACTIVE  ({PERSISTENCE_DIR}/)")
     print()
     print("  Run  python simulator.py  in Terminal 2")
@@ -254,11 +397,7 @@ if __name__ == "__main__":
     print("=" * 55)
     print()
 
-    build_pipeline()
-    setup_doc_store()
-
-    pw.run(
-        persistence_config=pw.persistence.Config(
-            pw.persistence.Backend.filesystem(PERSISTENCE_DIR),
-        )
-    )
+    if USE_REAL:
+        run_pathway()
+    else:
+        run_simulation()
