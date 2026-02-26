@@ -1,0 +1,45 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+*.egg
+.eggs/
+
+# Virtual environments
+venv/
+.venv/
+env/
+.env
+
+# Runtime-generated output (pipeline writes these every tick)
+output/*.json
+output/*.jsonl
+
+# Persistence state (binary/json blobs rebuilt at runtime)
+persistence/
+
+# Generated/live data CSVs (recreated by pipeline on first run)
+data/live_dolphin.csv
+data/live_mining.csv
+
+# Pipeline log files
+pipeline_out.txt
+*.log
+*.txt.bak
+
+# Jupyter
+.ipynb_checkpoints/
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE
+.vscode/settings.json
+.idea/
