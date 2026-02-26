@@ -1,4 +1,4 @@
-﻿"""
+"""
 JalJeevan Score - FINAL DASHBOARD
 """
 from fastapi import FastAPI

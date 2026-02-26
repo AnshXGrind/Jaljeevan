@@ -1,4 +1,4 @@
-﻿"""
+"""
 JalJeevan Score - WORKING Pipeline
 Real Pathway streaming where available; identical-semantics fallback on Windows.
 """
