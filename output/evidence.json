@@ -1,1 +1,1 @@
-{"case_id": "CASE-Zone9-20260226", "generated_at": "2026-02-26T17:44:12.198290", "zone": "Zone9", "evidence_package": {"dolphin_count": 20, "avg_48h": 19.2, "mining_confidence": 0.94, "legal_refs": ["sand_mining_order.txt", "sand_mining_order.txt"], "status": "WARNING"}}
+{"case_id": "CASE-Zone9-20260226", "generated_at": "2026-02-26T17:44:20.265360", "zone": "Zone9", "evidence_package": {"dolphin_count": 20, "avg_48h": 19.2, "mining_confidence": 0.94, "legal_refs": ["sand_mining_order.txt", "sand_mining_order.txt"], "status": "WARNING"}}
