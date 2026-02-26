@@ -27,8 +27,12 @@ persistence/
 data/live_dolphin.csv
 data/live_mining.csv
 
-# Pipeline log files
+# Pipeline / app log files (auto-generated at runtime)
+*_out.txt
+*_err.txt
 pipeline_out.txt
+app_out.txt
+app_err.txt
 *.log
 *.txt.bak
 
