@@ -1,0 +1,53 @@
+NATIONAL GREEN TRIBUNAL
+Order No. 2024/ENV/45
+
+Subject: Ganga River Water Quality Management and Pollution Control
+
+WATER QUALITY STANDARDS
+All riverine water quality parameters shall conform to:
+- Dissolved Oxygen: minimum 5 mg/L
+- Biochemical Oxygen Demand: maximum 3 mg/L
+- Total Suspended Solids: maximum 100 mg/L
+- pH: 6.5 to 8.5
+- Turbidity: maximum 2 NTU in sanctuary zones
+- Heavy metals: within WHO guideline limits
+- Fecal coliform: zero tolerance at designated points
+
+MONITORING INFRASTRUCTURE
+1. Sentinel-2 satellite imagery analysis every 5 days
+2. CPCB automated water quality monitoring stations
+3. Real-time turbidity sensors in all zones
+4. Acoustic hydrophone arrays for pollution detection
+5. Visual inspection by trained monitors twice weekly
+
+INDUSTRIAL COMPLIANCE
+- Sewage treatment plants must achieve 95% efficiency minimum
+- Zero liquid discharge policy for mining operations
+- Hazardous waste must be disposed 50km from river
+- Industrial permits contingent on NGT approval
+- Annual environmental impact assessment mandatory
+
+SAND MINING RESTRICTIONS
+- Commercial mining banned within 500m of river edge
+- Mining season: October-April only (non-breeding)
+- Maximum 50 tonnes per day per zone
+- Dredging depth: not exceeding 2 meters
+- No night mining (21:00-06:00 hours)
+
+VIOLATION PENALTIES
+- Water pollution: ₹5 lakh per day of non-compliance
+- Unauthorized mining: ₹50 lakh + confiscation of equipment
+- Discharging toxic waste: ₹25 lakh + criminal prosecution
+- False monitoring data: ₹10 lakh + FIR filing
+
+MONITORING AUTHORITY
+- CPCB Regional Office (primary responsibility)
+- State Pollution Control Board (secondary monitoring)
+- NGT-appointed independent auditors
+- Local NGO environmental committees
+- Fishermen cooperative representatives
+
+Order Date: 2024-01-20
+Compliance Deadline: 60 days from order date
+Review Period: Every 90 days
+Authority: National Green Tribunal Act 2010

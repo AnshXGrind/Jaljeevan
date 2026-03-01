@@ -1,3 +1,1 @@
-{"zone": "Zone7", "dolphin_count": 41, "avg_48h": 39.0, "min_48h": 36, "max_48h": 41, "data_points": 3, "mining_detected": false, "mining_confidence": 0.0, "alert_time": "2026-02-26T19:09:17.692139", "status": false}
-{"zone": "Zone8", "dolphin_count": 33, "avg_48h": 31.33, "min_48h": 30, "max_48h": 33, "data_points": 3, "mining_detected": false, "mining_confidence": 0.0, "alert_time": "2026-02-26T19:09:17.692139", "status": false}
-{"zone": "Zone9", "dolphin_count": 20, "avg_48h": 18.33, "min_48h": 15, "max_48h": 20, "data_points": 3, "mining_detected": true, "mining_confidence": 0.94, "alert_time": "2026-02-26T19:09:17.692139", "status": false}
+[]

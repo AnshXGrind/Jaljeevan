@@ -62,9 +62,9 @@ try:
             writer = csv.writer(f)
             for zone in ZONES:
                 zone_id = zone["id"] if isinstance(zone, dict) else zone
-                # Simulate Zone9 decline (mining impact)
+                # Simulate Zone9 decline (mining impact) - faster decline
                 if zone_id == "Zone9":
-                    count = max(8, zone.get("base", 20) - (tick // 5) + random.randint(-2, 2))
+                    count = max(8, zone.get("base", 20) - (tick // 3) + random.randint(-1, 1))
                 else:
                     base = zone.get("base", 30) if isinstance(zone, dict) else 30
                     count = base + random.randint(-3, 3)

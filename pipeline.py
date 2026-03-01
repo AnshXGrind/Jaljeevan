@@ -391,7 +391,8 @@ if __name__ == "__main__":
     if USE_REAL:
         print("  Engine:     REAL Pathway (Linux/WSL)")
     else:
-        print("  Engine:     Simulation (Windows -- identical semantics)")
+        print("  ⚠️  Engine:     Python fallback (Windows)")
+        print("  ℹ️  For production, use Linux/WSL for real Pathway engine")
     print(f"  Streaming:  ACTIVE  (new rows detected every {AUTOCOMMIT_MS}ms)")
     print(f"  Stateful:   ACTIVE  (causal: mining -> dolphin decline)")
     print(f"  Doc Store:  ACTIVE  (watching {NGT_DIR}/)")

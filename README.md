@@ -9,6 +9,35 @@
 
 ---
 
+## 🚀 Quick Start
+
+```bash
+# Clone and setup
+git clone https://github.com/AnshXGrind/Jaljeevan
+cd Jaljeevan
+
+# Verify installation
+python fix_errors.py
+
+# Launch demo (choose one):
+
+# Option 1: Windows
+powershell -ExecutionPolicy Bypass -File demo.ps1
+
+# Option 2: Linux/Mac
+bash demo.sh
+
+# Option 3: Manual (3 terminals)
+# Terminal 1: python pipeline.py
+# Terminal 2: python app.py
+# Terminal 3: python simulator.py (optional, for live updates)
+
+# Visit dashboard
+open http://localhost:8000
+```
+
+---
+
 ## One-Line Pitch
 
 > **JalJeevan Score uses Gangetic dolphins as living sensors to detect river pollution and illegal sand mining in real time, auto-generating court-ready evidence and auto-filing FIRs for prosecution.**
@@ -55,6 +84,19 @@ The core insight: **dolphins are bio-indicators**. When they flee a zone, someth
 
 ---
 
+## 📊 Dashboard Preview
+
+The live dashboard displays:
+- **Real-time Zone Status**: Dolphins per zone with health indicators (🟢 healthy / 🟡 warning / 🔴 critical)
+- **Live Alerts**: Mining events with automatic FIR filing buttons
+- **Evidence Packages**: Court-ready documentation auto-generated from causal analysis
+- **Legal Search**: BM25 RAG search over 6+ NGT environmental orders
+- **Causal Timeline**: Visual representation of mining → dolphin decline → automatic prosecution
+
+**Access at**: `http://localhost:8000`
+
+---
+
 ## 🔥 How We Used Pathway (10 Requirements)
 
 | # | Hackathon Requirement | Our Implementation | Code Reference |
@@ -63,12 +105,12 @@ The core insight: **dolphins are bio-indicators**. When they flee a zone, someth
 | 2 | **Stateful Aggregations** | `.groupby(zone).reduce(avg, min, max, latest, count)` — 48h rolling windows per zone | `pipeline.py` L142–L151 |
 | 3 | **Temporal Joins** | `stats.join_left(mining_events, left.zone == right.zone)` — correlates dolphin decline with mining | `pipeline.py` L160–L172 |
 | 4 | **Event-Driven Updates** | Output files update within 2s of new CSV row — proven by `simulator.py` | `simulator.py` (entire file) |
-| 5 | **Document Store (Live Indexing)** | `data/ngt_orders/` folder monitored; BM25 keyword search over NGT legal docs | `app.py` rag() function |
-| 6 | **RAG (Retrieval Augmented Generation)** | `/api/legal?q=...` endpoint — hybrid BM25+semantic search over NGT orders | `app.py` L42–L57 |
+| 5 | **Document Store (Live Indexing)** | `data/ngt_orders/` folder with 6 detailed NGT orders; BM25 keyword search | `app.py` bm25_rag() function |
+| 6 | **RAG (Retrieval Augmented Generation)** | `/api/legal?q=...` endpoint — hybrid BM25+dynamic search over NGT orders | `app.py` L42–L57 |
 | 7 | **Exactly-Once Output** | `pw.io.jsonlines.write()` (real); content-hash dedup `_row_hash()` (simulation) | `pipeline.py` L186, L243 |
 | 8 | **Persistence** | `pw.persistence.Config(Backend.filesystem("./persistence/"))` — survives restarts | `pipeline.py` L191–L195 |
-| 9 | **Alert Generation** | Causal filter: `mining_detected AND decline > 20%` → auto-generates evidence package | `pipeline.py` L174–L185 |
-| 10 | **Output Sinks** | JSONL sinks: `output/stats.jsonl`, `output/alerts.jsonl` | `pipeline.py` L188–L189 |
+| 9 | **Alert Generation** | Causal filter: `mining_detected AND decline > 20%` → auto-generates evidence + auto-files FIR | `pipeline.py` L174–L185 |
+| 10 | **Output Sinks** | JSONL sinks: `output/stats.jsonl`, `output/alerts.jsonl` with exactly-once deduplication | `pipeline.py` L188–L189 |
 
 > **Dual-Engine Architecture:** On Linux/WSL the real Pathway binary runs natively.
 > On Windows, a semantically identical pure-Python simulation engine runs automatically —

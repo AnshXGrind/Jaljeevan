@@ -1,0 +1,71 @@
+NATIONAL GREEN TRIBUNAL
+Order No. 2024/CRIM/12
+
+Subject: FIR Filing Procedures and Evidence Standards for Environmental Crimes
+
+AUTOMATIC FIR PROTOCOL
+Environmental violations detected by monitoring systems shall trigger:
+1. Automatic notification to District Magistrate
+2. Case registration within 24 hours
+3. Evidence preservation and documentation
+4. Preliminary investigation within 72 hours
+5. Chargesheet filing within 30 days
+
+EVIDENCE STANDARDS
+Admissible evidence for environmental prosecution:
+- Satellite imagery (Sentinel-1, Sentinel-2 analysis)
+- Real-time water quality monitoring data
+- Acoustic recordings and hydrophone measurements
+- Photographic/video documentation
+- Independent environmental audits
+- Expert witness testimony (CPCB, WII, IIT specialists)
+- Computer-generated causal chain analysis
+
+LEGAL SECTIONS FOR MINING VIOLATIONS
+- IPC Section 379: Theft of natural resources (3 year imprisonment, ₹500 penalty)
+- IPC Section 409: Criminal breach of trust by public servant
+- EPA 1986 Section 15: Environmental damage (6 month to 5 years + ₹100,000)
+- Wildlife Protection Act 1972: Habitat destruction (1 to 3 years + ₹500-25,000)
+- Biological Diversity Act 2002: Unauthorized exploitation
+- Local Water Act provisions: Unauthorized water extraction
+
+CASE FILING AUTHORITY
+- District Magistrate has primary duty to file FIR
+- Customary magistrate court has jurisdiction
+- NGT can order suo moto case registration
+- Environmental NGOs authorized to file complaints
+- CPCB/State PCB can recommend prosecution
+
+INVESTIGATION PROTOCOL
+1. Scene investigation within 48 hours
+2. Evidence collection and chain of custody
+3. Expert consultation with hydrobiologists
+4. Causal analysis linking mining to dolphin decline
+5. Economic loss assessment (ecosystem services)
+6. Penalties based on severity and repeat offenses
+
+COURT PRESENTATION
+- Burden of proof: Clear and convincing evidence
+- Expert reports from independent laboratories
+- Satellite data analysis by certified consultants
+- Aquatic biologist testimony mandatory
+- NGT order violation constitutes separate charge
+
+PENALTIES FRAMEWORK
+First offense: ₹10 lakh to ₹25 lakh fine + 1 year imprisonment
+Second offense: ₹25 lakh to ₹50 lakh fine + 2-3 years imprisonment
+Repeat offender: ₹50 lakh to ₹1 crore + 3-5 years imprisonment
+Corporate liability: Up to 100 times above plus management prosecution
+
+SENTENCING FACTORS
+- Extent of environmental damage
+- Duration of violation
+- Attempts to conceal evidence
+- Cooperation with authorities
+- Prior environmental violations
+- Economic benefit derived
+
+Order Date: 2024-03-01
+Effective: Immediately
+Authority: NGT Act 2010, Section 15
+Review: Every 180 days based on enforcement outcomes
