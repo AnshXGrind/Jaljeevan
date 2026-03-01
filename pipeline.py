@@ -226,8 +226,14 @@ def run_pathway():
     )
 
     # 6. Exactly-once output to JSONL
-    pw.io.jsonlines.write(result, STATS_JSONL)
-    pw.io.jsonlines.write(alerts, ALERTS_JSONL)
+    # Note: Try jsonlines first (official), fall back to json if not available
+    try:
+        pw.io.jsonlines.write(result, STATS_JSONL)
+        pw.io.jsonlines.write(alerts, ALERTS_JSONL)
+    except (AttributeError, TypeError):
+        # Fallback for versions without jsonlines support
+        pw.io.json.write(result, STATS_JSONL)
+        pw.io.json.write(alerts, ALERTS_JSONL)
 
     # 7. Optional: DocumentStore for live NGT order indexing
     try:

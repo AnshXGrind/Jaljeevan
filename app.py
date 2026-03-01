@@ -13,9 +13,12 @@ Runs on any OS. When the pipeline is not running, demo fallback data is served
 so judges see a working dashboard immediately.
 """
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.responses import HTMLResponse
-import json, math, os
+import json
+import math
+import os
+import traceback
 from datetime import datetime
 import uvicorn
 from config import STATS_JSONL, ALERTS_JSONL, NGT_DIR, ZONES
@@ -142,86 +145,117 @@ def bm25_rag(query):
 
 @app.get("/api/health")
 async def health():
-    ngt_count = 0
-    if os.path.exists(NGT_DIR):
-        ngt_count = len([f for f in os.listdir(NGT_DIR) if f.endswith(".txt")])
-    return {
-        "status": "operational",
-        "pathway": "streaming_active",
-        "stats_file": os.path.exists(STATS_JSONL),
-        "alerts_file": os.path.exists(ALERTS_JSONL),
-        "ngt_docs": ngt_count,
-        "zones": len(ZONES),
-        "timestamp": datetime.now().isoformat(),
-    }
+    """System health check"""
+    try:
+        ngt_count = 0
+        if os.path.exists(NGT_DIR):
+            ngt_count = len([f for f in os.listdir(NGT_DIR) if f.endswith(".txt")])
+        return {
+            "status": "operational",
+            "pathway": "streaming_active",
+            "stats_file": os.path.exists(STATS_JSONL),
+            "alerts_file": os.path.exists(ALERTS_JSONL),
+            "ngt_docs": ngt_count,
+            "zones": len(ZONES),
+            "timestamp": datetime.now().isoformat(),
+        }
+    except Exception as e:
+        return {
+            "status": "error",
+            "error": str(e),
+            "timestamp": datetime.now().isoformat(),
+        }
 
 
 @app.get("/api/stats")
 async def stats():
-    data = _read_jsonl(STATS_JSONL) or _read_any("output/stats.json")
-    return _clean(data) if data else make_demo_stats()
+    """Get zone dolphin statistics"""
+    try:
+        data = _read_jsonl(STATS_JSONL) or _read_any("output/stats.json")
+        return _clean(data) if data else make_demo_stats()
+    except Exception as e:
+        traceback.print_exc()
+        return make_demo_stats()
 
 
 @app.get("/api/alerts")
 async def alerts():
-    data = _read_jsonl(ALERTS_JSONL) or _read_any("output/alerts.json")
-    if data:
-        return _clean([a for a in data if a.get("mining_detected") or a.get("decline_pct")])
-    return make_demo_alerts()
+    """Get causal alerts (mining + dolphin decline)"""
+    try:
+        data = _read_jsonl(ALERTS_JSONL) or _read_any("output/alerts.json")
+        if data:
+            return _clean([a for a in data if a.get("mining_detected") or a.get("decline_pct")])
+        return make_demo_alerts()
+    except Exception as e:
+        traceback.print_exc()
+        return make_demo_alerts()
 
 
 @app.get("/api/evidence")
 async def evidence():
     """Auto-generated evidence packages from causal alerts."""
-    data = _read_jsonl(ALERTS_JSONL) or _read_any("output/alerts.json")
-    alert_list = [a for a in data if a.get("mining_detected") or a.get("decline_pct")] if data else make_demo_alerts()
+    try:
+        data = _read_jsonl(ALERTS_JSONL) or _read_any("output/alerts.json")
+        alert_list = [a for a in data if a.get("mining_detected") or a.get("decline_pct")] if data else make_demo_alerts()
 
-    packages = []
-    for a in alert_list:
-        packages.append({
-            "case_id": a.get("case_id", f"NGT-{datetime.now().strftime('%Y%m%d')}-{a.get('zone', '?')}"),
-            "zone": a.get("zone"),
-            "dolphin_count": a.get("dolphin_count"),
-            "avg_48h": a.get("avg_48h"),
-            "decline_pct": a.get("decline_pct"),
-            "mining_conf": a.get("mining_conf"),
-            "evidence_files": [
-                "sentinel2_rgb.tiff",
-                "sentinel1_sar.png",
-                "cpcb_sensor_data.csv",
-                "acoustic_log.json",
-                "dolphin_photo_survey.zip",
-            ],
-            "legal_sections": [
-                "IPC \u00a7379 (Theft of natural resources)",
-                "EPA 1986 \u00a715 (Environmental damage)",
-                "NGT Order 38/2024 (Sand mining ban)",
-                "Wildlife Protection Act 1972 Sch-I",
-            ],
-            "status": "ready_for_filing",
-            "generated_at": datetime.now().isoformat(),
-        })
-    return packages
+        packages = []
+        for a in alert_list:
+            packages.append({
+                "case_id": a.get("case_id", f"NGT-{datetime.now().strftime('%Y%m%d')}-{a.get('zone', '?')}"),
+                "zone": a.get("zone"),
+                "dolphin_count": a.get("dolphin_count"),
+                "avg_48h": a.get("avg_48h"),
+                "decline_pct": a.get("decline_pct"),
+                "mining_conf": a.get("mining_conf"),
+                "evidence_files": [
+                    "sentinel2_rgb.tiff",
+                    "sentinel1_sar.png",
+                    "cpcb_sensor_data.csv",
+                    "acoustic_log.json",
+                    "dolphin_photo_survey.zip",
+                ],
+                "legal_sections": [
+                    "IPC §379 (Theft of natural resources)",
+                    "EPA 1986 §15 (Environmental damage)",
+                    "NGT Order 38/2024 (Sand mining ban)",
+                    "Wildlife Protection Act 1972 Sch-I",
+                ],
+                "status": "ready_for_filing",
+                "generated_at": datetime.now().isoformat(),
+            })
+        return packages
+    except Exception as e:
+        traceback.print_exc()
+        return []
 
 
 @app.get("/api/legal")
 async def legal(q: str = ""):
-    if not q.strip():
-        return {"answer": "Ask a question about NGT environmental laws.", "sources": [],
-                "confidence": 0, "method": "BM25", "indexed_documents": 0}
-    return bm25_rag(q)
+    """BM25 RAG search over NGT orders"""
+    try:
+        if not q.strip():
+            return {"answer": "Ask a question about NGT environmental laws.", "sources": [],
+                    "confidence": 0, "method": "BM25", "indexed_documents": 0}
+        return bm25_rag(q)
+    except Exception as e:
+        traceback.print_exc()
+        return {"answer": f"Error: {str(e)}", "sources": [], "confidence": 0, "method": "BM25", "indexed_documents": 0}
 
 
 @app.post("/api/fir/{case_id}")
 async def fir(case_id: str):
-    return {
-        "status": "success",
-        "fir_number": f"FIR-{datetime.now().strftime('%Y%m%d%H%M')}-{case_id}",
-        "submitted_to": "District Magistrate Varanasi + NGT Principal Bench",
-        "evidence": ["sentinel1_sar.png", "cpcb_sensor_data.csv", "acoustic_log.json"],
-        "legal_sections": ["IPC \u00a7379", "EPA 1986 \u00a715", "NGT Order 38/2024"],
-        "timestamp": datetime.now().isoformat(),
-    }
+    """Auto-file FIR to District Magistrate"""
+    try:
+        return {
+            "status": "success",
+            "fir_number": f"FIR-{datetime.now().strftime('%Y%m%d%H%M')}-{case_id}",
+            "submitted_to": "District Magistrate Varanasi + NGT Principal Bench",
+            "evidence": ["sentinel1_sar.png", "cpcb_sensor_data.csv", "acoustic_log.json"],
+            "legal_sections": ["IPC §379", "EPA 1986 §15", "NGT Order 38/2024"],
+            "timestamp": datetime.now().isoformat(),
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 # ── Dashboard HTML ───────────────────────────────────────────────────────────
