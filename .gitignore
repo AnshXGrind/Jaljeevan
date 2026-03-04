@@ -1,11 +1,48 @@
+# ── Python ────────────────────────────────────────────────────────────────────
 __pycache__/
-*.pyc
-*.pyo
-persistence/
+*.py[cod]
+*$py.class
+*.so
+*.egg
 *.egg-info/
 dist/
-.DS_Store
-*.log
-*_err.txt
-*_out.txt
+build/
+.eggs/
+.Python
+env/
+venv/
+.venv/
+
+# ── Environment ───────────────────────────────────────────────────────────────
 .env
+.env.local
+.env.*.local
+
+# ── Logs & debug output ───────────────────────────────────────────────────────
+*.log
+app_out.txt
+app_err.txt
+pipeline_err.txt
+pipeline_out.txt
+
+# ── Pathway persistence ───────────────────────────────────────────────────────
+persistence/
+
+# ── Output data ───────────────────────────────────────────────────────────────
+output/*.jsonl
+
+# ── IDE ───────────────────────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# ── Vosk / Whisper models ─────────────────────────────────────────────────────
+vosk-model*/
+*.pt
+
+# ── Pytest ────────────────────────────────────────────────────────────────────
+.pytest_cache/
+.coverage
+htmlcov/

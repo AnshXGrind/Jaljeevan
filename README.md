@@ -1,11 +1,21 @@
-<h1 align="center">🐬 JalJeevan Score</h1>
-<p align="center"><strong>Real-Time River Health Intelligence · Powered by Pathway</strong></p>
-<p align="center">
-  <img src="https://img.shields.io/badge/Pathway-Streaming-00c8ff?style=for-the-badge&logo=data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNMTIgMkw0IDdWMTdMMTIgMjJMMjAgMTdWN0wxMiAyWiIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLXdpZHRoPSIyIi8+PC9zdmc+" alt="Pathway"/>
-  <img src="https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white" alt="FastAPI"/>
-  <img src="https://img.shields.io/badge/Python-3.9+-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python"/>
-  <img src="https://img.shields.io/badge/Hack_For_Green_Bharat-🌿-228B22?style=for-the-badge" alt="GreenBharat"/>
-</p>
+<div align="center">
+
+<h1>🐬 JalJeevan Score</h1>
+<p><strong>Real-Time River Health Intelligence · Powered by Pathway</strong></p>
+
+<img src="https://img.shields.io/badge/Python-3.9+-blue?style=for-the-badge&logo=python" />
+<img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" />
+<img src="https://img.shields.io/badge/PRs-Welcome-brightgreen?style=for-the-badge" />
+<img src="https://img.shields.io/badge/Pathway-Streaming-orange?style=for-the-badge" />
+<img src="https://img.shields.io/badge/Status-Active-success?style=for-the-badge" />
+<img src="https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white" alt="FastAPI"/>
+<img src="https://img.shields.io/badge/Hack_For_Green_Bharat-🌿-228B22?style=for-the-badge" alt="GreenBharat"/>
+
+*Built for Hack For Green Bharat · Now Open Source*
+
+[Quick Start](#-quick-start) · [Architecture](#-architecture) · [API Reference](#-api-reference) · [Contributing](#-contributing) · [License](#-license)
+
+</div>
 
 ---
 
@@ -323,7 +333,53 @@ Jaljeevan/
 
 ---
 
-<p align="center">
-  <strong>Built with ❤️ and Pathway for Hack For Green Bharat 🌿</strong><br>
-  <em>Protecting India's rivers, one dolphin at a time</em>
-</p>
+---
+
+## 🤝 Contributing
+
+Contributions make open source amazing. **Any contribution you make is greatly appreciated.**
+
+1. Fork the repository
+2. Create your feature branch: `git checkout -b feature/AmazingFeature`
+3. Commit your changes: `git commit -m 'feat: add AmazingFeature'`
+4. Push to the branch: `git push origin feature/AmazingFeature`
+5. Open a Pull Request
+
+Please read [CONTRIBUTING.md](CONTRIBUTING.md) before submitting a PR.
+
+Good first issues are tagged [`good first issue`](https://github.com/AnshXGrind/Jaljeevan/issues?q=label%3A%22good+first+issue%22) — perfect if you're new to the project.
+
+---
+
+## 🗺️ Roadmap
+
+- [ ] Real hardware hydrophone connector
+- [ ] WhatsApp/SMS alerts for rangers
+- [ ] Mobile-responsive dashboard
+- [ ] Docker / docker-compose support
+- [ ] Integration with CPCB live API (vs. simulated)
+- [ ] Multi-language support (Hindi interface)
+
+See [open issues](https://github.com/AnshXGrind/Jaljeevan/issues) for the full list.
+
+---
+
+## 📄 License
+
+Distributed under the MIT License. See [LICENSE](LICENSE) for more information.
+
+---
+
+## 🙏 Acknowledgements
+
+- [Pathway](https://pathway.com/) — streaming engine
+- [Wildlife Institute of India](https://wii.gov.in/) — dolphin research data
+- [CPCB](https://cpcb.nic.in/) — water quality APIs
+- [ESA Copernicus / Sentinel-2](https://sentinel.esa.int/) — satellite imagery
+- [NGT](https://greentribunal.gov.in/) — legal orders
+
+---
+
+<div align="center">
+Made with ❤️ for India's rivers · <a href="https://github.com/AnshXGrind/Jaljeevan/issues">Report a Bug</a> · <a href="https://github.com/AnshXGrind/Jaljeevan/issues">Request a Feature</a>
+</div>
